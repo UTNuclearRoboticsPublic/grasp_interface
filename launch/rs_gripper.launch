@@ -1,0 +1,50 @@
+<launch>
+  <arg name="sim" default="false" />
+  <arg name="node" default="false" />
+  <arg name="ip" default="192.168.1.11" />
+  <arg name="robotiq_prefix" default="" />
+
+  <node 
+    unless="$(arg sim)"
+    name="SModelTcpNode"
+    pkg="robotiq_s_model_control"
+    type="SModelTcpNode.py" 
+    args="$(arg ip)"
+    output="screen"
+  />
+  <node 
+    if="$(arg sim)"
+    name="SModelTcpNode"
+    pkg="robotiq_driver"
+    type="robotiq_simulator.py"
+    args=""
+    output="screen"
+  />
+  
+  <node
+    name="s_model_joint_states"
+    pkg="robotiq_joint_state_publisher"
+    type="s_model_joint_states" 
+    args="$(arg robotiq_prefix)"
+    output="screen"
+  />
+  
+  <group if="$(arg node)">
+    <node
+      if="$(arg sim)"
+      name="rs_gripper_interface_node"
+      pkg="grasp_interface"
+      type="rs_gripper_interface_node" 
+      args="sim"
+      output="screen"
+    />
+    
+    <node
+      unless="$(arg sim)"
+      name="rs_gripper_interface_node"
+      pkg="grasp_interface"
+      type="rs_gripper_interface_node" 
+      output="screen"
+    />
+  </group>
+</launch>
