@@ -25,9 +25,10 @@
     name="s_model_joint_states"
     pkg="robotiq_joint_state_publisher"
     type="s_model_joint_states" 
-    args="$(arg robotiq_prefix)"
     output="screen"
-  />
+  >
+    <param name="prefix" type="string" value="$(arg robotiq_prefix)" />
+  </node>
   
   <group if="$(arg node)">
     <node
