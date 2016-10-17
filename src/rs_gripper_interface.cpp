@@ -1,9 +1,9 @@
 #include "rs_gripper_interface.h"
 
 std::vector<std::string> RSGripperInterface::fingerNames 
-  {"finger_1_link_0", "finger_1_link_1", "finger_1_link_2", "finger_1_link_3",
-  "finger_2_link_0", "finger_2_link_1", "finger_2_link_2", "finger_2_link_3",
-  "finger_middle_link_0", "finger_middle_link_1", "finger_middle_link_2", "finger_middle_link_3"}; 
+  {"robotiq_finger_1_link_0", "robotiq_finger_1_link_1", "robotiq_finger_1_link_2", "robotiq_finger_1_link_3",
+  "robotiq_finger_2_link_0", "robotiq_finger_2_link_1", "robotiq_finger_2_link_2", "robotiq_finger_2_link_3",
+  "robotiq_finger_middle_link_0", "robotiq_finger_middle_link_1", "robotiq_finger_middle_link_2", "robotiq_finger_middle_link_3"}; 
 
 RSGripperInterface::RSGripperInterface(bool _sim) :
   n(),
