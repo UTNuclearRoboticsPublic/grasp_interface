@@ -12,7 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   robotiq_c_model_control
   roscpp
   std_msgs
+  geometry_msgs
   message_generation
+  obj_interface
 )
 
 ## Generate messages in the 'msg' folder
@@ -39,7 +41,7 @@ add_message_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  std_msgs
+  std_msgs geometry_msgs obj_interface
 )
 
 ###################################
@@ -70,19 +72,19 @@ include_directories(
 # Declare a C++ library
 add_library(grasp_interface src/gripper_interface.cpp src/rs_gripper_interface.cpp src/rc_gripper_interface.cpp)
 add_dependencies(grasp_interface ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} grasp_interface_generate_messages_cpp)
-target_link_libraries(grasp_interface ${catkin_LIBRARIES} obj_interface )
+target_link_libraries(grasp_interface ${catkin_LIBRARIES})
 
 add_executable(rs_gripper_interface_node src/gripper_interface.cpp  src/rs_gripper_interface_node.cpp)
 add_dependencies(rs_gripper_interface_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} grasp_interface robotiq_s_model_control grasp_interface_generate_messages_cpp)
-target_link_libraries(rs_gripper_interface_node ${catkin_LIBRARIES} grasp_interface obj_interface )
+target_link_libraries(rs_gripper_interface_node ${catkin_LIBRARIES} grasp_interface)
 
 add_executable(rs_gripper_interface_test src/rs_gripper_interface_test.cpp)
 add_dependencies(rs_gripper_interface_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} grasp_interface grasp_interface_generate_messages_cpp)
-target_link_libraries(rs_gripper_interface_test ${catkin_LIBRARIES} grasp_interface obj_interface)
+target_link_libraries(rs_gripper_interface_test ${catkin_LIBRARIES} grasp_interface)
 
 add_executable(rc_gripper_interface_node src/gripper_interface.cpp  src/rc_gripper_interface_node.cpp)
 add_dependencies(rc_gripper_interface_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} grasp_interface robotiq_c_model_control grasp_interface_generate_messages_cpp)
-target_link_libraries(rc_gripper_interface_node ${catkin_LIBRARIES} grasp_interface obj_interface )
+target_link_libraries(rc_gripper_interface_node ${catkin_LIBRARIES} grasp_interface)
 
 #############
 ## Install ##
