@@ -234,9 +234,12 @@ void RSGripperInterface::setPosition(int positionA, int positionB, int positionC
     case 1: //pinch
       //According to Matt, any position is good. The gripper understands what mode it's in
       break;
+    case 2: //wide TODO
+      ROS_ERROR_STREAM("[RSGripperInterface] setPosition() isn't implemented yet for wide mode.");
+      break;
     case 3: //scissor TODO
       ROS_ERROR_STREAM("[RSGripperInterface] setPosition() isn't implemented yet for scissor mode.");
-    case 2: //wide TODO
+      break;
     default:
       ROS_WARN_STREAM("[RSGripperInterface] Finger limits haven't been determined for mode " << (int)command.rMOD << ". The fingers may never reach their final positions.");
       break;
