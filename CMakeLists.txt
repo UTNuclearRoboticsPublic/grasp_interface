@@ -78,9 +78,7 @@ add_executable(rs_gripper_interface_node src/gripper_interface.cpp  src/rs_gripp
 add_dependencies(rs_gripper_interface_node 
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
   ${catkin_EXPORTED_TARGETS} 
-  grasp_interface 
-  robotiq_s_model_control
-  robotiq_s_model_control_generate_messages_cpp
+  grasp_interface
   grasp_interface_generate_messages_cpp)
 target_link_libraries(rs_gripper_interface_node ${catkin_LIBRARIES} grasp_interface)
 
@@ -93,8 +91,6 @@ add_dependencies(rc_gripper_interface_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
   ${catkin_EXPORTED_TARGETS} 
   grasp_interface 
-  robotiq_c_model_control
-  robotiq_c_model_control_generate_messages_cpp
   grasp_interface_generate_messages_cpp)
 target_link_libraries(rc_gripper_interface_node ${catkin_LIBRARIES} grasp_interface)
 
