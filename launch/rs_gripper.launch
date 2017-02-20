@@ -15,7 +15,7 @@
   <node 
     if="$(arg sim)"
     name="SModelTcpNode"
-    pkg="robotiq_driver"
+    pkg="robotiq_simulator"
     type="robotiq_simulator.py"
     args=""
     output="screen"
