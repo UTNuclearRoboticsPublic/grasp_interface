@@ -14,7 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   message_generation
-  obj_interface
 )
 
 ## Generate messages in the 'msg' folder
@@ -41,7 +40,7 @@ add_message_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  std_msgs geometry_msgs obj_interface
+  std_msgs geometry_msgs
 )
 
 ###################################
@@ -56,7 +55,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES grasp_interface
-  CATKIN_DEPENDS obj_interface robotiq_s_model_control robotiq_c_model_control
+  CATKIN_DEPENDS robotiq_s_model_control robotiq_c_model_control
 #  DEPENDS system_lib
 )
 
