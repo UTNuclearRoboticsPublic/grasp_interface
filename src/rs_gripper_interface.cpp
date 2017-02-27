@@ -1,4 +1,4 @@
-#include "rs_gripper_interface.h"
+#include "grasp_interface/rs_gripper_interface.h"
 
 std::vector<std::string> RSGripperInterface::fingerNames 
   {"robotiq_finger_1_link_0", "robotiq_finger_1_link_1", "robotiq_finger_1_link_2", "robotiq_finger_1_link_3",

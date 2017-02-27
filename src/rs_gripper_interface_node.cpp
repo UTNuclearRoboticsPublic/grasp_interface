@@ -1,4 +1,4 @@
-#include <rs_gripper_interface.h>
+#include <grasp_interface/rs_gripper_interface.h>
 
 int main(int argc, char **argv)
 {

@@ -1,4 +1,4 @@
-#include "gripper_interface.h"
+#include "grasp_interface/gripper_interface.h"
 
 
 GripperInterface::GripperInterface() :

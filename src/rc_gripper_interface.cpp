@@ -1,4 +1,4 @@
-#include "rc_gripper_interface.h"
+#include "grasp_interface/rc_gripper_interface.h"
 
 
 RCGripperInterface::RCGripperInterface() :
