@@ -24,8 +24,8 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
     gripperCommandPub = n.advertise<robotiq_s_model_control::SModel_robot_output>("SModelRobotOutput",1);
     gripperStatusSub = n.subscribe("SModelRobotInput",1,&RSGripperInterface::cb_getGripperStatus,this);
     
-    command.rICF = 1; //command fingers separately, always
-    gripperCommandPub.publish(command);
+    //command.rICF = 1; //command fingers separately, always
+    //gripperCommandPub.publish(command);
 
     float printTime = 10, retryTime = 0.1;
     ros::Time start = ros::Time::now();
@@ -37,7 +37,7 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
       ros::Duration(retryTime).sleep();
     }
     if(!ros::isShuttingDown()) {
-      ros::Duration(0.5).sleep();  // give a chance to receive the current gripepr status
+      //ros::Duration(0.5).sleep();  // give a chance to receive the current gripepr status
       ROS_INFO("[RSGripperInterface] Connected to gripper");
       connected = true;
       
@@ -46,6 +46,7 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
         activated = true;
 
         // set internal position/mode to actual gripper position/mode
+        command.rICF = 1;
         command.rPRA = status.gPOA;
         command.rPRB = status.gPOB;
         command.rPRC = status.gPOC;
@@ -132,6 +133,8 @@ void RSGripperInterface::deactivate()
 void RSGripperInterface::activate()
 {
   ROS_INFO("[RSGripperInterface] Activating");
+  if(activated)
+    return;
   if(!sim) { // because we aren't calling sendCommand we need an explicit check for simulation here
     command.rACT = 1; //do the activation
     //don't call sendCommand, because sendCommand includes an activation check. Instead
