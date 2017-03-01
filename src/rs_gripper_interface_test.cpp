@@ -1,15 +1,9 @@
 #include <ros/ros.h>
 #include <iostream>
-#include <rs_gripper_interface.h>
+#include <grasp_interface/rs_gripper_interface.h>
 
 /**
  * @brief   Test the robotiq gripper code
- *
- * @version 1.0
- * 
- * @author  Adam Allevato <adam.d.allevato@gmail.com>
- * @copyright BSD 3-paragraph
- * @date    Nov 23, 2015
  */
  
 int main(int argc, char** argv) {

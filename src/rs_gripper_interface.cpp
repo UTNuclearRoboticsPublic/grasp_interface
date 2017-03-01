@@ -37,18 +37,21 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
       ros::Duration(retryTime).sleep();
     }
     if(!ros::isShuttingDown()) {
+      ros::Duration(0.5).sleep();  // give a chance to receive the current gripepr status
       ROS_INFO("[RSGripperInterface] Connected to gripper");
       connected = true;
       
       //check for pre-activation
       if(status.gACT == 1) {
-	activated = true;
-	command.rPRA = status.gPOA;
-	command.rPRB = status.gPOB;
-	command.rPRC = status.gPOC;
-	command.rPRS = status.gPRS;
-	command.rMOD = status.gMOD;
-	ROS_DEBUG_STREAM("[RSGripperInterface] Gripper already activated, connected with mode " << ((int)status.gMOD));
+        activated = true;
+
+        // set internal position/mode to actual gripper position/mode
+        command.rPRA = status.gPOA;
+        command.rPRB = status.gPOB;
+        command.rPRC = status.gPOC;
+        command.rPRS = status.gPRS;
+        command.rMOD = status.gMOD;
+        ROS_DEBUG_STREAM("[RSGripperInterface] Gripper already activated, connected with mode " << ((int)status.gMOD));
       }
     }
   }
@@ -136,7 +139,7 @@ void RSGripperInterface::activate()
     gripperCommandPub.publish(command);
     if(block) {
       while(status.gIMC != 3) {
-	ROS_INFO_DELAYED_THROTTLE(10, "[RSGripperInterface] Waiting for activation to complete...");
+  ROS_INFO_DELAYED_THROTTLE(10, "[RSGripperInterface] Waiting for activation to complete...");
       }
       ROS_DEBUG("[RSGripperInterface] Finished activation");
     }
@@ -255,7 +258,7 @@ void RSGripperInterface::setPosition(int positionA, int positionB, int positionC
   if(block) {
     if(status.gPRA != positionA || status.gPRB != positionB || status.gPRC != positionC) {
       while(status.gDTA != 0 && status.gDTB != 0 && status.gDTC != 0 && status.gDTS != 0) {
-	ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to begin...");
+  ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to begin...");
       }
     }
     while(status.gDTA == 0 || status.gDTB == 0 || status.gDTC == 0 || status.gDTS == 0) {
