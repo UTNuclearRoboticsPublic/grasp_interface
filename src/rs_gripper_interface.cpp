@@ -71,7 +71,7 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
       connected = true;
       
       //check for pre-activation
-      if(status.gACT == 1) {
+      if(status.gIMC == 3) {
         activated = true;
 
         // set internal position/mode to actual gripper position/mode
@@ -162,8 +162,8 @@ void RSGripperInterface::deactivate()
 void RSGripperInterface::activate()
 {
   ROS_INFO("[RSGripperInterface] Activating");
-  if(activated)
-    return;
+  // if(activated)
+  //   return;
   if(!sim) { // because we aren't calling sendCommand we need an explicit check for simulation here
     command.rACT = 1; //do the activation
     //don't call sendCommand, because sendCommand includes an activation check. Instead
