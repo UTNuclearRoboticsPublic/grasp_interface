@@ -1,20 +1,20 @@
 // Copyright (c) 2016, The University of Texas at Austin
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice,
 //    this list of conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its
 //    contributors may be used to endorse or promote products derived from
 //    this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 // IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 // THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -44,7 +44,7 @@
  *		1) C++ objects, as seen in rs_gripper_interface_test.cpp
  *		2) Publish commands on the ROS topic "grip_command".
  * @version 1.0
- * 
+ *
  * @author  Adam Allevato <adam.d.allevato@gmail.com>
  * @copyright BSD 3-paragraph
  * @date    Dec 4, 2015
@@ -53,7 +53,7 @@ class GripperInterface {
 public:
   GripperInterface();
   // Basic Commands //////////////////////////////////////////////////////////////////////
-  
+
   /// After calling this, the gripper's internal state should be reset, including clearing any faults.
   virtual void reset() {};
   /**
@@ -65,19 +65,19 @@ public:
   virtual void activate() = 0;
   /// Stop the robot as quickly as possible.
   virtual void eStop() = 0;
-  
+
   // Adv Commands //////////////////////////////////////////////////////////////////////
-  
+
   /// Move the robot to a generally "decent" starting position.
   virtual void home() = 0;
-  
+
   /// Fully close the gripper
   virtual void fullOpen() = 0;
   /// Fully open the gripper
   virtual void fullClose() = 0;
-  
+
   // Setters //////////////////////////////////////////////////////////////////////
-  
+
   /**
    * Set the position of the fingers. 0 represents fully open, with higher numbers being
    * more and more closed. Units and range will depend on specific gripper.
@@ -92,19 +92,19 @@ public:
    * Grippers that are open-loop should override this method to disable blocking functionality.
    */
   void setBlocking(bool blocking);
-  
+
 protected:
   /**
    * Convenience: clamp a number between 0 and 255.
    */
   void clampByte(int& toClamp, std::string name) {};
-  
+
   bool block;          /// If true, commands wait for closed loop completion before returning
   bool connected;
   bool activated;     /// If true, the gripper is ready to move.
 
   int messagesReceived_; /// The number of status messages received from the gripper since node begin. Can be used to check if gripper is connected
-  
+
 private:
   /**
    * Apply changes to the hardware. Implement as empty for a simulated gripper.

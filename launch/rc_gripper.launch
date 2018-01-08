@@ -35,31 +35,31 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <arg name="ip" default="192.168.1.11" />
   <arg name="robotiq_prefix" default="" />
 
-  <node 
+  <node
     unless="$(arg sim)"
     name="CModelTcpNode"
     pkg="robotiq_c_model_control"
-    type="CModelTcpNode.py" 
+    type="CModelTcpNode.py"
     args="$(arg ip)"
     output="screen"
   />
-  
-  
+
+
   <group if="$(arg node)">
     <node
       if="$(arg sim)"
       name="rc_gripper_interface_node"
       pkg="grasp_interface"
-      type="rc_gripper_interface_node" 
+      type="rc_gripper_interface_node"
       args="sim"
       output="screen"
     />
-    
+
     <node
       unless="$(arg sim)"
       name="rc_gripper_interface_node"
       pkg="grasp_interface"
-      type="rc_gripper_interface_node" 
+      type="rc_gripper_interface_node"
       output="screen"
     />
   </group>

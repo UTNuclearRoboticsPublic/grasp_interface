@@ -1,20 +1,20 @@
 // Copyright (c) 2016, The University of Texas at Austin
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice,
 //    this list of conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its
 //    contributors may be used to endorse or promote products derived from
 //    this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 // IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 // THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -29,30 +29,31 @@
 
 #include "grasp_interface/rs_gripper_interface.h"
 
-std::vector<std::string> RSGripperInterface::fingerNames 
+std::vector<std::string> RSGripperInterface::fingerNames
   {"robotiq_finger_1_link_0", "robotiq_finger_1_link_1", "robotiq_finger_1_link_2", "robotiq_finger_1_link_3",
   "robotiq_finger_2_link_0", "robotiq_finger_2_link_1", "robotiq_finger_2_link_2", "robotiq_finger_2_link_3",
-  "robotiq_finger_middle_link_0", "robotiq_finger_middle_link_1", "robotiq_finger_middle_link_2", "robotiq_finger_middle_link_3"}; 
+  "robotiq_finger_middle_link_0", "robotiq_finger_middle_link_1", "robotiq_finger_middle_link_2", "robotiq_finger_middle_link_3"};
 
 RSGripperInterface::RSGripperInterface(bool _sim) :
   n(),
   spinner(2),
   command(),
+  status(),
   sim(_sim)
 {
   spinner.start();
   // In case commands are sent via a ROS topic:
   gripperCommandSub = n.subscribe("grip_command",1, &RSGripperInterface::cb_command,this);
-    
+
   if(sim) {
     ROS_INFO("[RSGripperInterface] Connecting in simulation mode.");
     connected = true;
     block = false; // make calls finish instantly
   } else {
-    
+
     gripperCommandPub = n.advertise<robotiq_s_model_control::SModel_robot_output>("SModelRobotOutput",1);
     gripperStatusSub = n.subscribe("SModelRobotInput",1,&RSGripperInterface::cb_getGripperStatus,this);
-    
+
     //command.rICF = 1; //command fingers separately, always
     //gripperCommandPub.publish(command);
 
@@ -69,7 +70,7 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
       //ros::Duration(0.5).sleep();  // give a chance to receive the current gripepr status
       ROS_INFO("[RSGripperInterface] Connected to gripper");
       connected = true;
-      
+
       //check for pre-activation
       if(status.gIMC == 3) {
         activated = true;
@@ -115,7 +116,7 @@ void RSGripperInterface::sendCommand() {
     ROS_ERROR("[RSGripperInterface] Can't control the gripper, it's not activated yet. Call activate()");
     return;
   }
-  
+
   if(sim) {
     return;
   }
@@ -197,13 +198,13 @@ void RSGripperInterface::setMode(int newMode)
   }
   ROS_DEBUG_STREAM("[RSGripperInterface] Setting gripper mode to " << (int)newMode);
   command.rMOD = newMode;
-  
+
   //do not return the fingers to their positions after changing mode
   command.rPRA = 0;
   command.rPRB = 0;
   command.rPRC = 0;
   sendCommand();
-  
+
   if(block) {
     while(status.gMOD != newMode) {
       ROS_WARN_DELAYED_THROTTLE(5, "[RSGripperInterface] Waiting for mode change to echo...");
@@ -254,14 +255,14 @@ void RSGripperInterface::setPosition(int position) {
   setPosition(position, position, position);
 }
 
-void RSGripperInterface::setPosition(int positionA, int positionB, int positionC) 
+void RSGripperInterface::setPosition(int positionA, int positionB, int positionC)
 {
   clampByte(positionA, "finger A position");
   clampByte(positionB, "finger B position");
   clampByte(positionC, "finger C position");
-  
+
   ROS_DEBUG_STREAM("[RSGripperInterface] Moving fingers to position " << positionA << ", " << positionB << ", " << positionC);
-  
+
   switch(command.rMOD) {
     case 0:
       //any position is good
@@ -279,18 +280,18 @@ void RSGripperInterface::setPosition(int positionA, int positionB, int positionC
       ROS_WARN_STREAM("[RSGripperInterface] Finger limits haven't been determined for mode " << (int)command.rMOD << ". The fingers may never reach their final positions.");
       break;
   }
-  
+
   command.rPRA = positionA;
   command.rPRB = positionB;
   command.rPRC = positionC;
   command.rGTO = 1;
   sendCommand();
-  
+
   //wait for position message to post
   if(block) {
     if(status.gPRA != positionA || status.gPRB != positionB || status.gPRC != positionC) {
       while(status.gDTA != 0 && status.gDTB != 0 && status.gDTC != 0 && status.gDTS != 0) {
-  ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to begin...");
+        ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to begin...");
       }
     }
     while(status.gDTA == 0 || status.gDTB == 0 || status.gDTC == 0 || status.gDTS == 0) {
@@ -348,21 +349,21 @@ void RSGripperInterface::cb_getGripperStatus(const robotiq_s_model_control::SMod
   //msg.gGTO;  // 1 = going to position, 0 = doing something else
   //msg.gIMC;  // 0 = gripper in reset state, 1 = activating, 2 = changing mode, 3 = activation/mode change complete
   //msg.gSTA;  // 0 = moving to position (with gGTO=1), 1=gripper stopped, at least one finger completed move, 2 = no fingers completed, 3 = all fingers completed
-  
+
   //msg.gDTA;  // 0 = finger A in motion (with gGTO=1), 1 = finger A stopped due to contact while open, 2 = finger A stopped due to contact while closing, 3 = finger A at position
   //msg.gDTB;  // same for finger b
   //msg.gDTC;  // same for finger c
   //msg.gDTS;  // same, but for scissor move only
-  
+
   //msg.gFLT;  // Fault indicator
       // 0 - no fault
-                         
+
       // priority
       // 5 - action delayed, wait for activation to finish
       // 6 - action delayed, wait for mode change to finish
       // 7 - not activated
 
-      // minor 
+      // minor
       // 9 - communication chip not ready (may be booting)
       // 10 - changing mode fault, interference on scissor (<20sec)
       // 11 - automatic release in progress
@@ -371,23 +372,23 @@ void RSGripperInterface::cb_getGripperStatus(const robotiq_s_model_control::SMod
       // 13 - activation fault
       // 14 - fault changing mode, interference detected on scissor (>20sec)
       // 15 - auto release completed. reset and activation required
-  
+
   //msg.gPRA; //Position request of Finger A (echoed command)
   //msg.gPOA; // Position of Finger A. 0 = open, 255 = closed
   //msg.gCUA; //Finger A current
-  
+
   //msg.gPRB; //finger B position request
   //msg.gPOB; //finger B position
   //msg.gCUB; //finger B current
-  
+
   //msg.gPRC; //finger C position request
   //msg.gPOC; //finger C position
   //msg.gCUC; //finger C current
-  
+
   //msg.gPRS; //scissor position request
   //msg.gPOS; //scissor position
   //msg.gCUS; //scissor current
-  
+
   switch(status.gFLT) {
     case 0:
       break;
