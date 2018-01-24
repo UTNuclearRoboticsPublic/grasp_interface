@@ -71,8 +71,7 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
       connected = true;
       
       //check for pre-activation
-      if(status.gACT == 1) {
-        activated = true;
+      if(activated) {
 
         // set internal position/mode to actual gripper position/mode
         command.rICF = 1;
@@ -151,19 +150,22 @@ void RSGripperInterface::deactivate()
   command.rACT = 0;
   sendCommand();
   if(block) {
-    while(status.gACT != 0) {
+    while(activated) {
       ROS_WARN_DELAYED_THROTTLE(5, "[RSGripperInterface] Waiting for gripper to turn off...");
     }
     ROS_DEBUG("[RSGripperInterface] Finished dectivation");
   }
-  activated = false;
 }
 
 void RSGripperInterface::activate()
 {
-  ROS_INFO("[RSGripperInterface] Activating");
-  if(activated)
+  if(activated){
+    ROS_INFO("[RSGripperInterface] Already activated");
     return;
+  }
+
+  ROS_INFO("[RSGripperInterface] Activating");
+
   if(!sim) { // because we aren't calling sendCommand we need an explicit check for simulation here
     command.rACT = 1; //do the activation
     //don't call sendCommand, because sendCommand includes an activation check. Instead
@@ -171,12 +173,11 @@ void RSGripperInterface::activate()
     gripperCommandPub.publish(command);
     if(block) {
       while(status.gIMC != 3) {
-  ROS_INFO_DELAYED_THROTTLE(10, "[RSGripperInterface] Waiting for activation to complete...");
+        ROS_INFO_DELAYED_THROTTLE(10, "[RSGripperInterface] Waiting for activation to complete...");
       }
       ROS_DEBUG("[RSGripperInterface] Finished activation");
     }
   }
-  activated = true;
 }
 
 void RSGripperInterface::setMode(Mode newMode)
@@ -290,11 +291,11 @@ void RSGripperInterface::setPosition(int positionA, int positionB, int positionC
   if(block) {
     if(status.gPRA != positionA || status.gPRB != positionB || status.gPRC != positionC) {
       while(status.gDTA != 0 && status.gDTB != 0 && status.gDTC != 0 && status.gDTS != 0) {
-  ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to begin...");
+        ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to begin...");
       }
     }
-    while(status.gDTA == 0 || status.gDTB == 0 || status.gDTC == 0 || status.gDTS == 0) {
-      ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to complete...");
+    while(status.gIMC !=3) {
+      ROS_INFO_THROTTLE(5, "[RSGripperInterface +] Waiting for move to complete...");
     }
   }
 }
@@ -387,6 +388,8 @@ void RSGripperInterface::cb_getGripperStatus(const robotiq_s_model_control::SMod
   //msg.gPRS; //scissor position request
   //msg.gPOS; //scissor position
   //msg.gCUS; //scissor current
+
+  activated = status.gACT;
   
   switch(status.gFLT) {
     case 0:
@@ -418,7 +421,7 @@ void RSGripperInterface::cb_getGripperStatus(const robotiq_s_model_control::SMod
 // Process incoming ROS commands
 void RSGripperInterface::cb_command(const grasp_interface::RSGripperCommand& alpha)
 {
-  if (activated != true)
+  if (!activated)
     activate();
 
   //order is important
