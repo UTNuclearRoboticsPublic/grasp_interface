@@ -42,7 +42,6 @@ int main(int argc, char** argv) {
   RSGripperInterface gripper = RSGripperInterface(false);
   ROS_INFO("[RSGripperInterfaceTest] activating");
   gripper.activate();
-  return 1;
   
   //temp tests/////////////////////////////
   
