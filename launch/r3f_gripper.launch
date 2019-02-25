@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <node
     unless="$(arg sim)"
     name="SModelTcpNode"
-    pkg="robotiq_s_model_control"
+    pkg="robotiq_3f_gripper_control"
     type="SModelTcpNode.py"
     args="$(arg ip)"
     output="screen"

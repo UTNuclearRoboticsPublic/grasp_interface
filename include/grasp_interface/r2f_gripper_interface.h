@@ -30,8 +30,8 @@
 #include <grasp_interface/gripper_interface.h>
 
 //ROS messages
-#include <robotiq_c_model_control/CModel_robot_output.h>
-#include <robotiq_c_model_control/CModel_robot_input.h>
+#include <robotiq_2f_gripper_control/Robotiq2FGripper_robot_output.h>
+#include <robotiq_2f_gripper_control/Robotiq2FGripper_robot_input.h>
 
 #ifndef RC_GRIPPER_INTERFACE_H
 #define RC_GRIPPER_INTERFACE_H
@@ -66,7 +66,7 @@
  * @copyright BSD 3-paragraph
  * @date    Nov 23, 2015
  */
-class RCGripperInterface : public GripperInterface {
+class r2fGripperInterface : public GripperInterface {
 public:
   /**
    * Possible modes for the gripper
@@ -80,11 +80,11 @@ public:
 
   
   //Default constructor
-  RCGripperInterface();
+  r2fGripperInterface();
   
   // ROS callbacks
-  void cb_getGripperStatus(const robotiq_c_model_control::CModel_robot_input& msg);
-  void cb_command(const grasp_interface::RCGripperCommand& alpha);
+  void cb_getGripperStatus(const robotiq_2f_gripper_control::Robotiq2FGripper_robot_input& msg);
+  void cb_command(const grasp_interface::r2fGripperCommand& alpha);
   
   // Basic Commands //////////////////////////////////////////////////////////////////////////
   void reset();
@@ -159,9 +159,9 @@ private:
   ros::Subscriber gripperCommandSub;                      /// Listen for people trying to use this gripper
   
   ros::Subscriber gripperStatusSub;                       /// Listen to the gripper
-  robotiq_c_model_control::CModel_robot_input status;     /// The status returned from the gripper
+  robotiq_2f_gripper_control::Robotiq2FGripper_robot_input status;     /// The status returned from the gripper
   
-  robotiq_c_model_control::CModel_robot_output command;   /// Store the command to send to the gripper
+  robotiq_2f_gripper_control::Robotiq2FGripper_robot_output command;   /// Store the command to send to the gripper
   ros::Publisher gripperCommandPub;                       /// Used to send the command to the gripper
 };
 

@@ -15,8 +15,8 @@
   
   <depend>geometry_msgs</depend>
   <depend>std_msgs</depend>
-  <depend>robotiq_c_model_control</depend>
-  <depend>robotiq_s_model_control</depend>
+  <depend>robotiq_2f_gripper_control</depend>
+  <depend>robotiq_3f_gripper_control</depend>
   <depend>roscpp</depend>
   
   <build_depend>message_generation</build_depend>

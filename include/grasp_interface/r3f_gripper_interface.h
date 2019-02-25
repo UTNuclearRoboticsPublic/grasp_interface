@@ -30,8 +30,8 @@
 #include <grasp_interface/gripper_interface.h>
 
 //ROS messages
-#include <robotiq_s_model_control/SModel_robot_output.h>
-#include <robotiq_s_model_control/SModel_robot_input.h>
+#include <robotiq_3f_gripper_control/Robotiq3FGripper_robot_output.h>
+#include <robotiq_3f_gripper_control/Robotiq3FGripper_robot_input.h>
 
 #ifndef RS_GRIPPER_INTERFACE_H
 #define RS_GRIPPER_INTERFACE_H
@@ -66,7 +66,7 @@
  * @copyright BSD 3-paragraph
  * @date    Nov 23, 2015
  */
-class RSGripperInterface : public GripperInterface {
+class r3fGripperInterface : public GripperInterface {
 public:
   /**
    * Modes as defined by Robotiq
@@ -84,11 +84,11 @@ public:
   ///Default constructor
   ///@arg timeout: Time to wait before giving up on a connection.
   ///@arg sim: if true, connect in simulation mode (don't wait for response from hardware)
-  RSGripperInterface(bool sim = false);
+  r3fGripperInterface(bool sim = false);
   
   // ROS callbacks
-  void cb_getGripperStatus(const robotiq_s_model_control::SModel_robot_input& msg);
-  void cb_command(const grasp_interface::RSGripperCommand& alpha);
+  void cb_getGripperStatus(const robotiq_3f_gripper_control::Robotiq3FGripper_robot_input& msg);
+  void cb_command(const grasp_interface::r3fGripperCommand& alpha);
   
   // Basic Commands //////////////////////////////////////////////////////////////////////////
   void reset() override;
@@ -172,9 +172,9 @@ private:
   ros::Subscriber gripperCommandSub;                      /// Listen for people trying to use this gripper
   
   ros::Subscriber gripperStatusSub;                       /// Listen to the gripper
-  robotiq_s_model_control::SModel_robot_input status;     /// The status returned from the gripper
+  robotiq_3f_gripper_control::Robotiq3FGripper_robot_input status;     /// The status returned from the gripper
   
-  robotiq_s_model_control::SModel_robot_output command;   /// Store the command to send to the gripper
+  robotiq_3f_gripper_control::Robotiq3FGripper_robot_output command;   /// Store the command to send to the gripper
   ros::Publisher gripperCommandPub;                       /// Used to send the command to the gripper
 };
 

@@ -8,16 +8,16 @@ endif()
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
-  robotiq_c_model_control
-  robotiq_s_model_control
+  robotiq_2f_gripper_control
+  robotiq_3f_gripper_control
   roscpp
   std_msgs
 )
 
 add_message_files(
   FILES
-  RCGripperCommand.msg
-  RSGripperCommand.msg
+  r2fGripperCommand.msg
+  r3fGripperCommand.msg
 )
 generate_messages(
   DEPENDENCIES
@@ -29,8 +29,8 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-    robotiq_c_model_control
-    robotiq_s_model_control
+  robotiq_2f_gripper_control
+  robotiq_3f_gripper_control
 )
 
 include_directories(
@@ -38,27 +38,27 @@ include_directories(
   include
 )
 
-add_library(${PROJECT_NAME} src/gripper_interface.cpp src/rs_gripper_interface.cpp src/rc_gripper_interface.cpp)
+add_library(${PROJECT_NAME} src/gripper_interface.cpp src/r3f_gripper_interface.cpp src/r2f_gripper_interface.cpp)
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
-add_executable(rs_gripper_interface_node src/gripper_interface.cpp  src/rs_gripper_interface_node.cpp)
-add_dependencies(rs_gripper_interface_node 
+add_executable(r3f_gripper_interface_node src/gripper_interface.cpp  src/r3f_gripper_interface_node.cpp)
+add_dependencies(r3f_gripper_interface_node 
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
   ${catkin_EXPORTED_TARGETS} 
   ${PROJECT_NAME}_generate_messages_cpp)
-target_link_libraries(rs_gripper_interface_node ${catkin_LIBRARIES} ${PROJECT_NAME})
+target_link_libraries(r3f_gripper_interface_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(rs_gripper_interface_test src/rs_gripper_interface_test.cpp)
-add_dependencies(rs_gripper_interface_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
-target_link_libraries(rs_gripper_interface_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+add_executable(r3f_gripper_interface_test src/r3f_gripper_interface_test.cpp)
+add_dependencies(r3f_gripper_interface_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(r3f_gripper_interface_test ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(rc_gripper_interface_node src/gripper_interface.cpp  src/rc_gripper_interface_node.cpp)
-add_dependencies(rc_gripper_interface_node 
+add_executable(r2f_gripper_interface_node src/gripper_interface.cpp  src/r2f_gripper_interface_node.cpp)
+add_dependencies(r2f_gripper_interface_node 
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
   ${catkin_EXPORTED_TARGETS}
   grasp_interface_generate_messages_cpp)
-target_link_libraries(rc_gripper_interface_node ${catkin_LIBRARIES} ${PROJECT_NAME})
+target_link_libraries(r2f_gripper_interface_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 
 install(DIRECTORY include/${PROJECT_NAME}/

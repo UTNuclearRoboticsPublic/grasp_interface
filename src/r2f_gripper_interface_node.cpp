@@ -27,14 +27,14 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <grasp_interface/rc_gripper_interface.h>
+#include <grasp_interface/r2f_gripper_interface.h>
 
 int main(int argc, char **argv)
 {
   // Initialize the ros grab_interface_node
-  ros::init(argc, argv, "rc_gripper_interface_node");
+  ros::init(argc, argv, "r2f_gripper_interface_node");
   
-  RCGripperInterface r = RCGripperInterface();
+  r2fGripperInterface r = r2fGripperInterface();
 
   ros::waitForShutdown();
   return 0;

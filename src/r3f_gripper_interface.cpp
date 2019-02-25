@@ -15,11 +15,11 @@
 //    contributors may be used to endorse or promote products derived from
 //    this software without specific prior written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDEr3f AND CONTRIBUTOr3f "AS
 // IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 // THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
 // PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// CONTRIBUTOr3f BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
 // EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 // PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
 // OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
@@ -27,14 +27,14 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "grasp_interface/rs_gripper_interface.h"
+#include "grasp_interface/r3f_gripper_interface.h"
 
-std::vector<std::string> RSGripperInterface::fingerNames
+std::vector<std::string> r3fGripperInterface::fingerNames
   {"robotiq_finger_1_link_0", "robotiq_finger_1_link_1", "robotiq_finger_1_link_2", "robotiq_finger_1_link_3",
   "robotiq_finger_2_link_0", "robotiq_finger_2_link_1", "robotiq_finger_2_link_2", "robotiq_finger_2_link_3",
   "robotiq_finger_middle_link_0", "robotiq_finger_middle_link_1", "robotiq_finger_middle_link_2", "robotiq_finger_middle_link_3"};
 
-RSGripperInterface::RSGripperInterface(bool _sim) :
+r3fGripperInterface::r3fGripperInterface(bool _sim):
   n(),
   spinner(2),
   command(),
@@ -43,16 +43,16 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
 {
   spinner.start();
   // In case commands are sent via a ROS topic:
-  gripperCommandSub = n.subscribe("grip_command",1, &RSGripperInterface::cb_command,this);
+  gripperCommandSub = n.subscribe("grip_command",1, &r3fGripperInterface::cb_command,this);
 
   if(sim) {
-    ROS_INFO("[RSGripperInterface] Connecting in simulation mode.");
+    ROS_INFO("[r3fGripperInterface] Connecting in simulation mode.");
     connected = true;
     block = false; // make calls finish instantly
   } else {
 
-    gripperCommandPub = n.advertise<robotiq_s_model_control::SModel_robot_output>("SModelRobotOutput",1);
-    gripperStatusSub = n.subscribe("SModelRobotInput",1,&RSGripperInterface::cb_getGripperStatus,this);
+    gripperCommandPub = n.advertise<robotiq_3f_gripper_control::Robotiq3FGripper_robot_output>("r3fModelRobotOutput",1);
+    gripperStatusSub = n.subscribe("r3fModelRobotInput",1,&r3fGripperInterface::cb_getGripperStatus,this);
 
     //command.rICF = 1; //command fingers separately, always
     //gripperCommandPub.publish(command);
@@ -63,12 +63,12 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
       (gripperCommandPub.getNumSubscribers() <= 0 || messagesReceived_ == 0) && // wait for connection
       !ros::isShuttingDown())                                             // but stop if ROS shuts down
     {
-      ROS_INFO_STREAM_THROTTLE(printTime, "[RSGripperInterface] Waiting for connection with gripper (" << (ros::Time::now() - start) << "s elasped)");
+      ROS_INFO_STREAM_THROTTLE(printTime, "[r3fGripperInterface] Waiting for connection with gripper (" << (ros::Time::now() - start) << "s elasped)");
       ros::Duration(retryTime).sleep();
     }
     if(!ros::isShuttingDown()) {
       //ros::Duration(0.5).sleep();  // give a chance to receive the current gripepr status
-      ROS_INFO("[RSGripperInterface] Connected to gripper");
+      ROS_INFO("[r3fGripperInterface] Connected to gripper");
       connected = true;
 
       //check for pre-activation
@@ -82,15 +82,15 @@ RSGripperInterface::RSGripperInterface(bool _sim) :
         command.rPRC = status.gPOC;
         command.rPRS = status.gPRS;
         command.rMOD = status.gMOD;
-        ROS_DEBUG_STREAM("[RSGripperInterface] Gripper already activated, connected with mode " << ((int)status.gMOD));
+        ROS_DEBUG_STREAM("[r3fGripperInterface] Gripper already activated, connected with mode " << ((int)status.gMOD));
       }
     }
   }
 }
 
-void RSGripperInterface::sendCommand() {
+void r3fGripperInterface::sendCommand() {
   if(!isConnected()) {
-    ROS_ERROR("[RSGripperInterface] Can't control the gripper, it's not connected or activated yet.");
+    ROS_ERROR("[r3fGripperInterface] Can't control the gripper, it's not connected or activated yet.");
     return;
   }
   //command.rACT //Shows if the gripper has been activated
@@ -109,11 +109,11 @@ void RSGripperInterface::sendCommand() {
   //command.rPRC //Commanded Position of Finger A
   //command.rSPC //Speed of Finger C
   //command.rFRC //Force of Finger C
-  //command.rPRS //Scissor Position Request
+  //command.rPr3f //Scissor Position Request
   //command.rSPS //Speed for Scissor
-  //command.rFRS //Force for Scissor
+  //command.rFr3f //Force for Scissor
   if(!activated) {
-    ROS_ERROR("[RSGripperInterface] Can't control the gripper, it's not activated yet. Call activate()");
+    ROS_ERROR("[r3fGripperInterface] Can't control the gripper, it's not activated yet. Call activate()");
     return;
   }
 
@@ -124,8 +124,8 @@ void RSGripperInterface::sendCommand() {
   return;
 }
 
-void RSGripperInterface::eStop() {
-  ROS_FATAL("[RSGripperInterface] Beginning soft RS gripper E-stop");
+void r3fGripperInterface::eStop() {
+  ROS_FATAL("[r3fGripperInterface] Beginning soft r3f gripper E-stop");
   command.rATR = 1;
   sendCommand();
   if(block) {
@@ -133,36 +133,36 @@ void RSGripperInterface::eStop() {
       ROS_WARN_DELAYED_THROTTLE(1, "Waiting for E-Stop to complete");
     }
   }
-  ROS_FATAL("[RSGripperInterface] Finished soft RS gripper E-stop");
+  ROS_FATAL("[r3fGripperInterface] Finished soft r3f gripper E-stop");
 }
 
 
-void RSGripperInterface::reset()
+void r3fGripperInterface::reset()
 {
-  ROS_DEBUG("[RSGripperInterface] Beginning reset");
+  ROS_DEBUG("[r3fGripperInterface] Beginning reset");
   deactivate();
-  command = robotiq_s_model_control::SModel_robot_output();
+  command = robotiq_3f_gripper_control::Robotiq3FGripper_robot_output();
   activate();
-  ROS_DEBUG("[RSGripperInterface] Finished reset");
+  ROS_DEBUG("[r3fGripperInterface] Finished reset");
 }
 
-void RSGripperInterface::deactivate()
+void r3fGripperInterface::deactivate()
 {
-  ROS_INFO("[RSGripperInterface] Deactivating");
+  ROS_INFO("[r3fGripperInterface] Deactivating");
   command.rACT = 0;
   sendCommand();
   if(block) {
     while(status.gACT != 0) {
-      ROS_WARN_DELAYED_THROTTLE(5, "[RSGripperInterface] Waiting for gripper to turn off...");
+      ROS_WARN_DELAYED_THROTTLE(5, "[r3fGripperInterface] Waiting for gripper to turn off...");
     }
-    ROS_DEBUG("[RSGripperInterface] Finished dectivation");
+    ROS_DEBUG("[r3fGripperInterface] Finished dectivation");
   }
   activated = false;
 }
 
-void RSGripperInterface::activate()
+void r3fGripperInterface::activate()
 {
-  ROS_INFO("[RSGripperInterface] Activating");
+  ROS_INFO("[r3fGripperInterface] Activating");
   // if(activated)
   //   return;
   if(!sim) { // because we aren't calling sendCommand we need an explicit check for simulation here
@@ -172,31 +172,31 @@ void RSGripperInterface::activate()
     gripperCommandPub.publish(command);
     if(block) {
       while(status.gIMC != 3) {
-  ROS_INFO_DELAYED_THROTTLE(10, "[RSGripperInterface] Waiting for activation to complete...");
+  ROS_INFO_DELAYED_THROTTLE(10, "[r3fGripperInterface] Waiting for activation to complete...");
       }
-      ROS_DEBUG("[RSGripperInterface] Finished activation");
+      ROS_DEBUG("[r3fGripperInterface] Finished activation");
     }
   }
   activated = true;
 }
 
-void RSGripperInterface::setMode(Mode newMode)
+void r3fGripperInterface::setMode(Mode newMode)
 {
   int modeNum = static_cast<int>(newMode);
   setMode(modeNum);
 }
 
-void RSGripperInterface::setMode(int newMode)
+void r3fGripperInterface::setMode(int newMode)
 {
   if(newMode == 3) {
-    ROS_ERROR("[RSGripperInterface] Scissor mode is not supported, ignoring mode switch command.");
+    ROS_ERROR("[r3fGripperInterface] Scissor mode is not supported, ignoring mode switch command.");
   }
   if(newMode > 3 || newMode < 0) {
-    ROS_ERROR_STREAM("[RSGripperInterface] Attemped to set gripper mode " << newMode <<
+    ROS_ERROR_STREAM("[r3fGripperInterface] Attemped to set gripper mode " << newMode <<
       ", which is outside acceptable range (0,1,2,3). Remaining in current mode, which is " << (int)status.gMOD);
     return;
   }
-  ROS_DEBUG_STREAM("[RSGripperInterface] Setting gripper mode to " << (int)newMode);
+  ROS_DEBUG_STREAM("[r3fGripperInterface] Setting gripper mode to " << (int)newMode);
   command.rMOD = newMode;
 
   //do not return the fingers to their positions after changing mode
@@ -207,16 +207,16 @@ void RSGripperInterface::setMode(int newMode)
 
   if(block) {
     while(status.gMOD != newMode) {
-      ROS_WARN_DELAYED_THROTTLE(5, "[RSGripperInterface] Waiting for mode change to echo...");
+      ROS_WARN_DELAYED_THROTTLE(5, "[r3fGripperInterface] Waiting for mode change to echo...");
       //wait for mode to be echoed
     }
     while(status.gIMC != 3) {
-      ROS_INFO_DELAYED_THROTTLE(5, "[RSGripperInterface] Waiting for mode change to complete...");
+      ROS_INFO_DELAYED_THROTTLE(5, "[r3fGripperInterface] Waiting for mode change to complete...");
     }
   }
 }
 
-void RSGripperInterface::home()
+void r3fGripperInterface::home()
 {
   setSpeed(255);
   setForce(128);
@@ -224,15 +224,15 @@ void RSGripperInterface::home()
   setPosition(0);
 }
 
-void RSGripperInterface::fullOpen()
+void r3fGripperInterface::fullOpen()
 {
-  ROS_INFO("[RSGripperInterface] Opening gripper");
+  ROS_INFO("[r3fGripperInterface] Opening gripper");
   setPosition(0);
 }
 
-void RSGripperInterface::fullClose()
+void r3fGripperInterface::fullClose()
 {
-  ROS_INFO("[RSGripperInterface] Closing gripper");
+  ROS_INFO("[r3fGripperInterface] Closing gripper");
   switch(command.rMOD) {
     case 0: //basic
       setPosition(255);
@@ -243,25 +243,25 @@ void RSGripperInterface::fullClose()
     case 2: //wide TODO
     case 3: //scissor TODO
     default:
-      ROS_ERROR_STREAM("[RSGripperInterface] fullClose isn't implemented yet for mode " << (int)command.rMOD << ". Please use setPosition() instead");
+      ROS_ERROR_STREAM("[r3fGripperInterface] fullClose isn't implemented yet for mode " << (int)command.rMOD << ". Please use setPosition() instead");
       break;
   }
 }
 
 
-void RSGripperInterface::setPosition(int position) {
+void r3fGripperInterface::setPosition(int position) {
   clampByte(position, "finger position"); //to avoid triple print out in three-position call
-  ROS_DEBUG_STREAM("[RSGripperInterface] Moving all fingers to position " << position);
+  ROS_DEBUG_STREAM("[r3fGripperInterface] Moving all fingers to position " << position);
   setPosition(position, position, position);
 }
 
-void RSGripperInterface::setPosition(int positionA, int positionB, int positionC)
+void r3fGripperInterface::setPosition(int positionA, int positionB, int positionC)
 {
   clampByte(positionA, "finger A position");
   clampByte(positionB, "finger B position");
   clampByte(positionC, "finger C position");
 
-  ROS_DEBUG_STREAM("[RSGripperInterface] Moving fingers to position " << positionA << ", " << positionB << ", " << positionC);
+  ROS_DEBUG_STREAM("[r3fGripperInterface] Moving fingers to position " << positionA << ", " << positionB << ", " << positionC);
 
   switch(command.rMOD) {
     case 0:
@@ -271,13 +271,13 @@ void RSGripperInterface::setPosition(int positionA, int positionB, int positionC
       //According to Matt, any position is good. The gripper understands what mode it's in
       break;
     case 2: //wide TODO
-      ROS_ERROR_STREAM("[RSGripperInterface] setPosition() isn't implemented yet for wide mode.");
+      ROS_ERROR_STREAM("[r3fGripperInterface] setPosition() isn't implemented yet for wide mode.");
       break;
     case 3: //scissor TODO
-      ROS_ERROR_STREAM("[RSGripperInterface] setPosition() isn't implemented yet for scissor mode.");
+      ROS_ERROR_STREAM("[r3fGripperInterface] setPosition() isn't implemented yet for scissor mode.");
       break;
     default:
-      ROS_WARN_STREAM("[RSGripperInterface] Finger limits haven't been determined for mode " << (int)command.rMOD << ". The fingers may never reach their final positions.");
+      ROS_WARN_STREAM("[r3fGripperInterface] Finger limits haven't been determined for mode " << (int)command.rMOD << ". The fingers may never reach their final positions.");
       break;
   }
 
@@ -291,56 +291,56 @@ void RSGripperInterface::setPosition(int positionA, int positionB, int positionC
   if(block) {
     if(status.gPRA != positionA || status.gPRB != positionB || status.gPRC != positionC) {
       while(status.gDTA != 0 && status.gDTB != 0 && status.gDTC != 0 && status.gDTS != 0) {
-        ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to begin...");
+        ROS_INFO_THROTTLE(5, "[r3fGripperInterface] Waiting for move to begin...");
       }
     }
     while(status.gDTA == 0 || status.gDTB == 0 || status.gDTC == 0 || status.gDTS == 0) {
-      ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to complete...");
+      ROS_INFO_THROTTLE(5, "[r3fGripperInterface] Waiting for move to complete...");
     }
   }
 }
 
-void RSGripperInterface::setSpeed(int speed)
+void r3fGripperInterface::setSpeed(int speed)
 {
   clampByte(speed, "finger speed");
-  ROS_DEBUG_STREAM("[RSGripperInterface] Setting all fingers to speed " << speed);
+  ROS_DEBUG_STREAM("[r3fGripperInterface] Setting all fingers to speed " << speed);
   command.rSPA = speed;
   command.rSPB = speed;
   command.rSPC = speed;
 }
 
-void RSGripperInterface::setForce(int force)
+void r3fGripperInterface::setForce(int force)
 {
   clampByte(force, "finger force");
-  ROS_DEBUG_STREAM("[RSGripperInterface] Setting all fingers to force " << force);
+  ROS_DEBUG_STREAM("[r3fGripperInterface] Setting all fingers to force " << force);
   command.rFRA = force;
   command.rFRB = force;
   command.rFRC = force;
 }
 
 
-bool RSGripperInterface::isObjectHeld() {
+bool r3fGripperInterface::isObjectHeld() {
   if(sim) return true;
   if(block) {
     while(status.gSTA == 0) {
-      ROS_INFO_THROTTLE(5, "[RSGripperInterface] Waiting for move to complete...");
+      ROS_INFO_THROTTLE(5, "[r3fGripperInterface] Waiting for move to complete...");
     }
   }
   return status.gSTA == 1 || status.gSTA == 2;
 }
 
-void RSGripperInterface::clampByte(int& toClamp, std::string name) {
+void r3fGripperInterface::clampByte(int& toClamp, std::string name) {
   if(toClamp < 0) {
-    ROS_WARN_STREAM("[RSGripperInterface] received " << name << " " << toClamp << ". This will be clamped to 0");
+    ROS_WARN_STREAM("[r3fGripperInterface] received " << name << " " << toClamp << ". This will be clamped to 0");
     toClamp = 0;
   }
   else if(toClamp > 255) {
-    ROS_WARN_STREAM("[RSGripperInterface] received " << name << " " << toClamp << ". This will be clamped to 255");
+    ROS_WARN_STREAM("[r3fGripperInterface] received " << name << " " << toClamp << ". This will be clamped to 255");
     toClamp = 255;
   }
 }
 
-void RSGripperInterface::cb_getGripperStatus(const robotiq_s_model_control::SModel_robot_input& msg)
+void r3fGripperInterface::cb_getGripperStatus(const robotiq_3f_gripper_control::Robotiq3FGripper_robot_input& msg)
 {
   messagesReceived_++;
   status = msg;
@@ -385,7 +385,7 @@ void RSGripperInterface::cb_getGripperStatus(const robotiq_s_model_control::SMod
   //msg.gPOC; //finger C position
   //msg.gCUC; //finger C current
 
-  //msg.gPRS; //scissor position request
+  //msg.gPr3f; //scissor position request
   //msg.gPOS; //scissor position
   //msg.gCUS; //scissor current
 
@@ -393,23 +393,23 @@ void RSGripperInterface::cb_getGripperStatus(const robotiq_s_model_control::SMod
     case 0:
       break;
     case 5:
-      ROS_WARN_THROTTLE(1, "[RSGripperInterface] Activation is not complete!");
+      ROS_WARN_THROTTLE(1, "[r3fGripperInterface] Activation is not complete!");
       break;
     case 6:
-      ROS_WARN_THROTTLE(1, "[RSGripperInterface] Mode change is not complete!");
+      ROS_WARN_THROTTLE(1, "[r3fGripperInterface] Mode change is not complete!");
       break;
     case 7:
-      ROS_WARN_THROTTLE(1, "[RSGripperInterface] Gripper is not activated yet!");
+      ROS_WARN_THROTTLE(1, "[r3fGripperInterface] Gripper is not activated yet!");
       break;
     case 9:
     case 10:
     case 11:
-      ROS_ERROR_STREAM_THROTTLE(10, "[RSGripperInterface] Minor fault detected, #" << (int)status.gFLT);
+      ROS_ERROR_STREAM_THROTTLE(10, "[r3fGripperInterface] Minor fault detected, #" << (int)status.gFLT);
       break;
     case 13:
     case 14:
     case 15:
-      ROS_FATAL_STREAM_THROTTLE(10, "[RSGripperInterface] Major fault detected, #" << (int)status.gFLT);
+      ROS_FATAL_STREAM_THROTTLE(10, "[r3fGripperInterface] Major fault detected, #" << (int)status.gFLT);
       break;
     default:
       break;
@@ -417,7 +417,7 @@ void RSGripperInterface::cb_getGripperStatus(const robotiq_s_model_control::SMod
 }
 
 // Process incoming ROS commands
-void RSGripperInterface::cb_command(const grasp_interface::RSGripperCommand& alpha)
+void r3fGripperInterface::cb_command(const grasp_interface::r3fGripperCommand& alpha)
 {
   if (activated != true)
     activate();
@@ -429,9 +429,9 @@ void RSGripperInterface::cb_command(const grasp_interface::RSGripperCommand& alp
   setPosition(alpha.position);
 }
 
-bool RSGripperInterface::isConnected() {
+bool r3fGripperInterface::isConnected() {
   if(!connected) {
-    ROS_WARN_THROTTLE(2.0, "[RSGripperInterface]: Not connected!");
+    ROS_WARN_THROTTLE(2.0, "[r3fGripperInterface]: Not connected!");
     return false;
   }
   return true;

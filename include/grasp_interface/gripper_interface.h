@@ -32,8 +32,8 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
-#include <grasp_interface/RSGripperCommand.h>
-#include <grasp_interface/RCGripperCommand.h>
+#include <grasp_interface/r2fGripperCommand.h>
+#include <grasp_interface/r3fGripperCommand.h>
 
 #ifndef GRIPPER_INTERFACE_H
 #define GRIPPER_INTERFACE_H
